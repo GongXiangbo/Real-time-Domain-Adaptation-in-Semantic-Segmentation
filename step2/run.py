@@ -26,7 +26,7 @@ class CityScapesDataset(Dataset):
       self.transform = transform
       self._set_files()
 
-      with open('/content/drive/MyDrive/mldl/BiseNetv/cityscapes_info.json', 'r') as fr:
+      with open('./data/cityscapes/cityscapes_info.json', 'r') as fr:
         labels_info = json.load(fr)
 
       self.lb_map = {el['id']: el['trainId'] for el in labels_info}
@@ -84,8 +84,8 @@ def main(params, model):
       t.RandomScale((0.5, 0.75, 1.0, 1.5))
       # t.RandomCrop((1024, 1024))         
     ])
-    train_dataset = CityScapesDataset(root='/content/drive/MyDrive/mldl/BiseNetv/data/data/Cityscapes', train=True, transform=transform_train)
-    val_dataset = CityScapesDataset(root='/content/drive/MyDrive/mldl/BiseNetv/data/data/Cityscapes', train=False)
+    train_dataset = CityScapesDataset(root='./data/cityscapes', train=True, transform=transform_train)
+    val_dataset = CityScapesDataset(root='./data/cityscapes', train=False)
     train_loader = DataLoader(train_dataset, batch_size=4, shuffle=True)
     val_loader = DataLoader(val_dataset, batch_size=1, shuffle=False)
     
