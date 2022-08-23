@@ -5,7 +5,6 @@ from utils.loss import CrossEntropy2d
 from models.utils import load_model
 import torch.nn.functional as F
 import torch.cuda.amp as amp
-from utils.utils import reverse_one_hot, compute_global_accuracy, fast_hist, per_class_iu
 
 
 def validate(args, model, val_loader, metrics, visualizer, val_iter):
