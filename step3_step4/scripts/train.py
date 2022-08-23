@@ -5,7 +5,7 @@ from tqdm import tqdm
 from utils.scheduler import PolyLR
 from utils.loss import CrossEntropy2d, FocalLoss, get_target_tensor, DiceLoss, get_target_tensor_mc
 from torch.nn import BCEWithLogitsLoss
-from scripts.eval import validate, val 
+from scripts.eval import validate 
 from models.utils import save_model, load_model, save_da_model, load_da_model, freeze_model
 import torch.nn.functional as F
 from dataset.utils import source_to_target, source_to_target_np
