@@ -9,7 +9,7 @@ from tqdm import tqdm
 import numpy as np
 from loss import DiceLoss
 import torch.cuda.amp as amp
-from train import val,train
+from train import val, train
 from PIL import Image
 import torchvision.transforms
 import cv2
