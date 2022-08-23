@@ -3,7 +3,6 @@ import torch.nn.functional as F
 
 
 class Discriminator(nn.Module):
-
     def __init__(self, num_classes):
       super(Discriminator, self).__init__()
       self.layers = nn.Sequential(
@@ -26,7 +25,6 @@ class Discriminator(nn.Module):
 
 
 class LightDiscriminator(nn.Module):
-
     def __init__(self, num_classes):
       super(LightDiscriminator, self).__init__()
       self.layers = nn.Sequential(
@@ -58,4 +56,3 @@ class DepthWiseSeparableConvolution(nn.Module):
         x = self.depth_wise(x)
         x = self.point_wise(x)
         return x
-		
