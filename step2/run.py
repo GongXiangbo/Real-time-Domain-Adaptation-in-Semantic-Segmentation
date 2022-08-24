@@ -20,9 +20,9 @@ import transform as t
 class CityScapesDataset(Dataset):
     def __init__(self, root, train=True, num_classes=19, transform=None):
       super(CityScapesDataset, self).__init__()
-      self.root = root #存放数据集的地址
-      self.train = train #是否为训练集
-      self.num_classes = num_classes #数据集的类别数量
+      self.root = root 
+      self.train = train 
+      self.num_classes = num_classes 
       self.transform = transform
       self._set_files()
 
@@ -31,15 +31,15 @@ class CityScapesDataset(Dataset):
 
       self.lb_map = {el['id']: el['trainId'] for el in labels_info}
 
-    def _set_files(self): #获取数据集图片
-      self.image_dir = os.path.join(self.root, 'images/') #图像地址
-      self.label_dir = os.path.join(self.root, 'labels/') #label地址
-      #获取训练或者验证的图像名字的txt文件
+    def _set_files(self): 
+      self.image_dir = os.path.join(self.root, 'images/') 
+      self.label_dir = os.path.join(self.root, 'labels/') 
+      
       if self.train == True:
         file_list = os.path.join(self.root, 'train.txt')
       else:
         file_list = os.path.join(self.root, 'val.txt')
-      #获取对应图片的名字
+      
       self.files = [line.split('/')[0] + '_' + line.split('_')[1] + '_' + line.split('_')[2] for line in tuple(open(file_list, 'r'))]
 
     def _load_data(self, index):
