@@ -13,7 +13,7 @@ from PIL import Image
 from ptflops import get_model_complexity_info
 
 from models.build_BiSeNet import BiSeNet
-from models.discriminator import Discriminator
+from models.discriminator import LightDiscriminator
 from models.utils import change_normalization_layer
 from scripts.train import train, continue_train
 from scripts.eval import test
@@ -242,3 +242,5 @@ def main():
     
 if __name__ == '__main__':
     main()
+
+    
