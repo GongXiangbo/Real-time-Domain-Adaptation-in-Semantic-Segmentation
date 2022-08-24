@@ -13,7 +13,7 @@ from PIL import Image
 from ptflops import get_model_complexity_info
 
 from models.build_BiSeNet import BiSeNet
-from models.discriminator import Discriminator
+from models.discriminator import LightDiscriminator
 from models.utils import change_normalization_layer
 from scripts.train import train, continue_train
 from scripts.eval import test
@@ -289,3 +289,10 @@ def main():
     
 if __name__ == '__main__':
     main()
+
+    
+#mesure total Parameters and flops 
+model_d = LightDiscriminator(19)
+macs, params = get_model_complexity_info(model_d, (19, 1024, 512), as_strings=True, print_per_layer_stat=False, verbose=False)
+print('{:<30}  {:<8}'.format('Flops: ', macs))
+print('{:<30}  {:<8}'.format('Number of parameters: ', params))
