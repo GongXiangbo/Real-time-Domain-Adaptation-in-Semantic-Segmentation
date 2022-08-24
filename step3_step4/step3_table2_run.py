@@ -211,7 +211,7 @@ def main():
 
     # Define data loaders
     transform = t.Compose([
-        # t.HorizontalFlip(),
+        t.HorizontalFlip(),
         t.RandomScale((0.5, 0.75, 1, 1.5))
     ])
     gta5_train_dataset = GTA5(transform=transform, root=args.source_dataroot, mean=args.mean, crop_size=args.crop_size_source, max_iters=args.max_iters)
