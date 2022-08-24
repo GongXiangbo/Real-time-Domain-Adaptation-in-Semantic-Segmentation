@@ -50,9 +50,9 @@ class GTA5(Dataset):
         self.mean = mean
         self.files = []
 
-        self.image_dir = os.path.join(self.root, 'images/') #图像地址
-        self.label_dir = os.path.join(self.root, 'labels/') #label地址
-        #获取训练的图像名字的txt文件
+        self.image_dir = os.path.join(self.root, 'images/') #image address
+        self.label_dir = os.path.join(self.root, 'labels/') #label address
+        #Get the txt file of the training images names
         file_list = os.path.join(self.root, 'train.txt')
         self.img_ids = [line.split('.')[0] for line in tuple(open(file_list, 'r'))]
         # import the class mapping
