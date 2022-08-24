@@ -114,7 +114,7 @@ class CityScapes(Dataset):
 
         self.img_ids = [line.split('/')[0] + '_' + line.split('_')[1] + '_' + line.split('_')[2] for line in tuple(open(file_list, 'r'))]
         # import the class mapping
-        self.info = json.load(open('/content/drive/MyDrive/MLDL/data/cityscapes/info.json', 'r'))
+        self.info = json.load(open('./data/cityscapes/info.json', 'r'))
         self.class_mapping = self.info['label2train']
 
         for name in self.img_ids:
