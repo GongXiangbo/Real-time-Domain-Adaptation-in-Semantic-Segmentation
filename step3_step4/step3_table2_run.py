@@ -42,7 +42,7 @@ class GTA5(Dataset):
         file_list = os.path.join(self.root, 'train.txt')
         self.img_ids = [line.split('.')[0] for line in tuple(open(file_list, 'r'))]
         # import the class mapping
-        self.info = json.load(open('/content/drive/MyDrive/MLDL/data/GTA5/info.json', 'r'))
+        self.info = json.load(open('./data/GTA5/info.json', 'r'))
         self.class_mapping = self.info['label2train']
 
         for name in self.img_ids:
