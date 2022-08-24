@@ -23,11 +23,11 @@ class Options:
         parser.add_argument('--ft', type=str, default=None, help='Restore model path to finetune on')
 
         # for training
-        parser.add_argument('--train_mode', type=str, default='train_da_light', help='source_only|target_only|train_da|train_da_light|')
+        parser.add_argument('--train_mode', type=str, default='train_da', help='source_only|target_only|train_da|train_da_light|')
         parser.add_argument('--continue_train', action='store_true', help='continue training: load the latest model')
         parser.add_argument('--which_iter', type=int, default=3751, help='which iter to load?')
         parser.add_argument('--max_iters', type=int, default=250000, help='# of max steps to do during training')
-        parser.add_argument('--early_stop', type=int, default=26000, help='# early stop iteration')
+        parser.add_argument('--early_stop', type=int, default=25000, help='# early stop iteration')
         parser.add_argument('--max_epochs', type=int, default=6, help='# maximum traing epochs')
         # parser.add_argument('--fine_tuning_steps', type=int, default=201, help='# of steps to fine-tune the fewse model')
         parser.add_argument('--seed', type=int, default=1234, help='seed to set random seed')
