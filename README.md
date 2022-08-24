@@ -1,2 +1,2 @@
 # MLDL-Real-time-Domain-Adaptation-in-Semantic-Segmentation
-In step2 use run.py to run the programm
+Course MLDL project of Master of Data Science and Engineering at the Politecnico di Torino
