@@ -111,19 +111,6 @@ def train(args, model, model_d, source_train_loader, target_train_loader, val_lo
         criterion_seg = CrossEntropy2d(ignore_label=args.ignore_index)
     criterion_d = BCEWithLogitsLoss()
 
-    # Resume model if continuing training
-    if args.continue_train:
-        model, model_d, model_d2, optimizer, optimizer_d, \
-        optimizer_d2, scheduler, scheduler_d, scheduler_d2, start_iter = load_da_model(args,
-                                                                                       model,
-                                                                                       model_d,
-                                                                                       optimizer,
-                                                                                       optimizer_d,
-                                                                                       scheduler,
-                                                                                       scheduler_d
-                                                                                       )
-
-
     # Start training
     iter_counter.record_training_start(start_iter)
     source_train_loader_it = iter(source_train_loader)
