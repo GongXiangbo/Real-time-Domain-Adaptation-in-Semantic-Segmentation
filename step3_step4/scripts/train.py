@@ -281,11 +281,6 @@ def train(args, model, model_d, source_train_loader, target_train_loader, val_lo
 
 def continue_train(args, model, model_d, source_train_loader, target_train_loader, val_loader, metrics, iter_counter, visualizer):
 
-    if args.ft is not None:
-        model = load_model(args, model, ft=args.ft)
-        validate(args, model, val_loader, metrics, visualizer, 0)
-        exit()
-
     # Initialize variables
     cudnn.benchmark = True
     cudnn.enabled = True
@@ -320,22 +315,20 @@ def continue_train(args, model, model_d, source_train_loader, target_train_loade
     if args.seg_loss == 'focal':
         criterion_seg = FocalLoss(num_class=args.num_classes,
                                   ignore_label=args.ignore_index)
-    elif args.seg_loss == 'dice':
-        criterion_seg = DiceLoss(num_classes=args.num_classes, ignore_index=args.ignore_index)
     else:
         criterion_seg = CrossEntropy2d(ignore_label=args.ignore_index)
     criterion_d = BCEWithLogitsLoss()
 
-    # Resume model if continuing training
-    model, model_d, optimizer, optimizer_d, \
-        scheduler, scheduler_d, start_iter = load_da_model(args,
-                                                          model,
-                                                          model_d,
-                                                          optimizer,
-                                                          optimizer_d,
-                                                          scheduler,
-                                                          scheduler_d
-                                                          )
+   
+    model, model_d, model_d2, optimizer, optimizer_d, \
+    optimizer_d2, scheduler, scheduler_d, scheduler_d2, start_iter = load_da_model(args,
+                                                                           model,
+                                                                           model_d,
+                                                                           optimizer,
+                                                                           optimizer_d,
+                                                                           scheduler,
+                                                                           scheduler_d
+                                                                           )
 
     # Start training
     iter_counter.record_training_start(start_iter)
@@ -364,16 +357,8 @@ def continue_train(args, model, model_d, source_train_loader, target_train_loade
         except:
             target_train_loader_it = iter(target_train_loader)
             target_images, target_labels, _, name = next(target_train_loader_it)
-            #validate(args, model, val_loader, metrics, visualizer, i_iter)
-            #model.train()
-
-        if args.use_st:
-            src_in_trg = source_to_target(source_images, target_images, L=0.01)
-            mean = torch.reshape(torch.from_numpy(args.mean), (1, 3, 1, 1))
-            B, C, H, W = source_images.shape
-            mean = mean.repeat(B, 1, H, W)
-            source_images = src_in_trg.clone() - mean
-            target_images = target_images - mean
+            validate(args, model, val_loader, metrics, visualizer, i_iter)
+            model.train()
 
         source_images, source_labels = source_images.to(args.gpu_ids[0], dtype=torch.float32), source_labels.to(
             args.gpu_ids[0], dtype=torch.long)
@@ -386,43 +371,33 @@ def continue_train(args, model, model_d, source_train_loader, target_train_loade
             param.requires_grad = False
 
         # Train Source
-        if args.model == "bisenetv2":
-            with amp.autocast():
-                spreds = model(source_images)
-                loss_seg_source = criterion_seg(spreds, source_labels)
-        else:
-            with amp.autocast():
-                spreds, spreds_sup1, spreds_sup2 = model(source_images)
-                loss1 = criterion_seg(spreds, source_labels)
-                loss2 = criterion_seg(spreds_sup1, source_labels)
-                loss3 = criterion_seg(spreds_sup2, source_labels)
-                loss_seg_source = loss1 + loss2 + loss3
+        with amp.autocast():
+            spreds, spreds_sup1, spreds_sup2 = model(source_images)
+            loss1 = criterion_seg(spreds, source_labels)
+            loss2 = criterion_seg(spreds_sup1, source_labels)
+            loss3 = criterion_seg(spreds_sup2, source_labels)
+            loss_seg_source = loss1 + loss2 + loss3
         scaler.scale(loss_seg_source).backward()
 
         # Train Target
-        if args.model == "bisenetv2":
-            with amp.autocast():
-                tpreds = model(target_images)
-                loss_seg_source = criterion_seg(spreds, source_labels)
-                if args.ssl == "ssl" or args.ssl == "ssl_st":
-                    loss_seg_target = criterion_seg(tpreds, target_labels)
-                else:
-                    loss_seg_target = 0.0
-        else:
-            with amp.autocast():
-                tpreds, tpreds_sup1, tpreds_sup2 = model(target_images)
-                if args.ssl == "ssl" or args.ssl == "ssl_st":
-                    losst1 = criterion_seg(tpreds, target_labels)
-                    losst2 = criterion_seg(tpreds_sup1, target_labels)
-                    losst3 = criterion_seg(tpreds_sup2, target_labels)
-                    loss_seg_target = losst1 + losst2 + losst3
-                else:
-                    loss_seg_target = 0.0
-        # Fool the discriminator
         with amp.autocast():
+            tpreds, _, _ = model(target_images)
+            # tsp = tpreds.clone().detach()
+            #_, tsp = tsp.max(dim=1)
+            # tsp = tsp.cpu().numpy()
+            if args.use_weights:
+                classes_weights = compute_ce_weights(args.num_classes, source_labels)
+                classes_weights = (classes_weights - np.min(classes_weights)) / (np.max(classes_weights) - np.min(classes_weights))
+                classes_weights = torch.from_numpy(classes_weights.astype(np.float32)).to(args.gpu_ids[0])
+            loss_seg_target = 0.0
+
+            # Fool the discriminator
             d_output = model_d(F.softmax(tpreds, dim=1))
-            loss_fool = criterion_d(d_output,
-                                    get_target_tensor(d_output, "source").to(args.gpu_ids[0], dtype=torch.float))
+            target_tensor = get_target_tensor_mc(d_output, "source").to(args.gpu_ids[0], dtype=torch.long)
+            if args.use_weights:
+                loss_fool = criterion_seg(d_output, target_tensor, weight=classes_weights)
+            else:
+                loss_fool = criterion_seg(d_output, target_tensor)
             loss_target = loss_fool * args.lambda_adv + loss_seg_target
         scaler.scale(loss_target).backward()
 
@@ -435,14 +410,14 @@ def continue_train(args, model, model_d, source_train_loader, target_train_loade
 
         with amp.autocast():
             d_output_source = model_d(F.softmax(source_predictions, dim=1))
-            target_tensor = get_target_tensor(d_output_source, "source")
-            source_d_loss = criterion_d(d_output_source, target_tensor.to(args.gpu_ids[0], dtype=torch.float)) / 2
+            target_tensor = get_target_tensor_mc(d_output_source, "source")
+            source_d_loss = criterion_seg(d_output_source, target_tensor.to(args.gpu_ids[0], dtype=torch.long)) / 2
         scaler.scale(source_d_loss).backward()
 
         with amp.autocast():
             d_output_target = model_d(F.softmax(target_predictions, dim=1))
-            target_tensor = get_target_tensor(d_output_target, "target")
-            target_d_loss = criterion_d(d_output_target, target_tensor.to(args.gpu_ids[0], dtype=torch.float)) / 2
+            target_tensor = get_target_tensor_mc(d_output_target, "target")
+            target_d_loss = criterion_seg(d_output_target, target_tensor.to(args.gpu_ids[0], dtype=torch.long)) / 2
         scaler.scale(target_d_loss).backward()
 
         scaler.step(optimizer)
