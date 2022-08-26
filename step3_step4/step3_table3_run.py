@@ -36,8 +36,8 @@ class GTA5(Dataset):
         self.mean = mean
         self.files = []
 
-        self.image_dir = os.path.join(self.root, 'images/') #图像地址
-        self.label_dir = os.path.join(self.root, 'labels/') #label地址
+        self.image_dir = os.path.join(self.root, 'images/') #image address
+        self.label_dir = os.path.join(self.root, 'labels/') #label address
         #获取训练的图像名字的txt文件
         file_list = os.path.join(self.root, 'train.txt')
         self.img_ids = [line.split('.')[0] for line in tuple(open(file_list, 'r'))]
@@ -104,8 +104,8 @@ class CityScapes(Dataset):
         self.set = 'train' if self.train else 'val'
         self.ssl = ssl
 
-        self.image_dir = os.path.join(self.root, 'images/') #图像地址
-        self.label_dir = os.path.join(self.root, 'labels/') #label地址
+        self.image_dir = os.path.join(self.root, 'images/') #image address
+        self.label_dir = os.path.join(self.root, 'labels/') #label address
 
         if self.train == True:
           file_list = os.path.join(self.root, 'train.txt')
