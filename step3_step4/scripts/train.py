@@ -416,13 +416,7 @@ def continue_train(args, model, model_d, source_train_loader, target_train_loade
         else:
             with amp.autocast():
                 tpreds, tpreds_sup1, tpreds_sup2 = model(target_images)
-                if args.ssl == "ssl" or args.ssl == "ssl_st":
-                    losst1 = criterion_seg(tpreds, target_labels)
-                    losst2 = criterion_seg(tpreds_sup1, target_labels)
-                    losst3 = criterion_seg(tpreds_sup2, target_labels)
-                    loss_seg_target = losst1 + losst2 + losst3
-                else:
-                    loss_seg_target = 0.0
+                loss_seg_target = 0.0
         # Fool the discriminator
         with amp.autocast():
             d_output = model_d(F.softmax(tpreds, dim=1))
