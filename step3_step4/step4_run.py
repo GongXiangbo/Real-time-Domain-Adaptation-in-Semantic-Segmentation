@@ -151,8 +151,8 @@ class CityScapes(Dataset):
         self.set = 'train' if self.train else 'val'
         self.ssl = ssl
 
-        self.image_dir = os.path.join(self.root, 'images/') #图像地址
-        self.label_dir = os.path.join(self.root, 'labels/') #label地址
+        self.image_dir = os.path.join(self.root, 'images/') #image address
+        self.label_dir = os.path.join(self.root, 'labels/') #label address
 
         if self.train == True:
           file_list = os.path.join(self.root, 'train.txt')
