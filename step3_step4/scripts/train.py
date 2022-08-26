@@ -415,7 +415,7 @@ def continue_train(args, model, model_d, source_train_loader, target_train_loade
                     loss_seg_target = 0.0
         else:
             with amp.autocast():
-                tpreds, tpreds_sup1, tpreds_sup2 = model(target_images)
+                tpreds, _, _ = model(target_images)
                 loss_seg_target = 0.0
         # Fool the discriminator
         with amp.autocast():
